@@ -18,6 +18,9 @@ type User {
 }
 
 type Product {
+  id: ID! @unique
+  createdAt: DateTime!
+  updatedAt: DateTime!
   name: String!
   pictureURL: String!
   price: Float!

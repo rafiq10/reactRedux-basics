@@ -19,6 +19,16 @@ type Post implements Node {
   author(where: UserWhereInput): User!
 }
 
+type Product implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  name: String!
+  pictureURL: String!
+  price: Float!
+  seller(where: UserWhereInput): User!
+}
+
 type User implements Node {
   id: ID!
   email: String!
@@ -59,10 +69,13 @@ type Mutation {
   createProduct(data: ProductCreateInput!): Product!
   updatePost(data: PostUpdateInput!, where: PostWhereUniqueInput!): Post
   updateUser(data: UserUpdateInput!, where: UserWhereUniqueInput!): User
+  updateProduct(data: ProductUpdateInput!, where: ProductWhereUniqueInput!): Product
   deletePost(where: PostWhereUniqueInput!): Post
   deleteUser(where: UserWhereUniqueInput!): User
+  deleteProduct(where: ProductWhereUniqueInput!): Product
   upsertPost(where: PostWhereUniqueInput!, create: PostCreateInput!, update: PostUpdateInput!): Post!
   upsertUser(where: UserWhereUniqueInput!, create: UserCreateInput!, update: UserUpdateInput!): User!
+  upsertProduct(where: ProductWhereUniqueInput!, create: ProductCreateInput!, update: ProductUpdateInput!): Product!
   updateManyPosts(data: PostUpdateInput!, where: PostWhereInput!): BatchPayload!
   updateManyUsers(data: UserUpdateInput!, where: UserWhereInput!): BatchPayload!
   updateManyProducts(data: ProductUpdateInput!, where: ProductWhereInput!): BatchPayload!
@@ -261,13 +274,6 @@ input PostWhereUniqueInput {
   id: ID
 }
 
-type Product {
-  name: String!
-  pictureURL: String!
-  price: Float!
-  seller(where: UserWhereInput): User!
-}
-
 type ProductConnection {
   pageInfo: PageInfo!
   edges: [ProductEdge]!
@@ -283,6 +289,7 @@ input ProductCreateInput {
 
 input ProductCreateManyWithoutSellerInput {
   create: [ProductCreateWithoutSellerInput!]
+  connect: [ProductWhereUniqueInput!]
 }
 
 input ProductCreateWithoutSellerInput {
@@ -297,21 +304,24 @@ type ProductEdge {
 }
 
 enum ProductOrderByInput {
+  id_ASC
+  id_DESC
+  createdAt_ASC
+  createdAt_DESC
+  updatedAt_ASC
+  updatedAt_DESC
   name_ASC
   name_DESC
   pictureURL_ASC
   pictureURL_DESC
   price_ASC
   price_DESC
-  id_ASC
-  id_DESC
-  updatedAt_ASC
-  updatedAt_DESC
-  createdAt_ASC
-  createdAt_DESC
 }
 
 type ProductPreviousValues {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
   name: String!
   pictureURL: String!
   price: Float!
@@ -343,11 +353,63 @@ input ProductUpdateInput {
 
 input ProductUpdateManyWithoutSellerInput {
   create: [ProductCreateWithoutSellerInput!]
+  connect: [ProductWhereUniqueInput!]
+  disconnect: [ProductWhereUniqueInput!]
+  delete: [ProductWhereUniqueInput!]
+  update: [ProductUpdateWithoutSellerInput!]
+  upsert: [ProductUpsertWithoutSellerInput!]
+}
+
+input ProductUpdateWithoutSellerDataInput {
+  name: String
+  pictureURL: String
+  price: Float
+}
+
+input ProductUpdateWithoutSellerInput {
+  where: ProductWhereUniqueInput!
+  data: ProductUpdateWithoutSellerDataInput!
+}
+
+input ProductUpsertWithoutSellerInput {
+  where: ProductWhereUniqueInput!
+  update: ProductUpdateWithoutSellerDataInput!
+  create: ProductCreateWithoutSellerInput!
 }
 
 input ProductWhereInput {
   AND: [ProductWhereInput!]
   OR: [ProductWhereInput!]
+  id: ID
+  id_not: ID
+  id_in: [ID!]
+  id_not_in: [ID!]
+  id_lt: ID
+  id_lte: ID
+  id_gt: ID
+  id_gte: ID
+  id_contains: ID
+  id_not_contains: ID
+  id_starts_with: ID
+  id_not_starts_with: ID
+  id_ends_with: ID
+  id_not_ends_with: ID
+  createdAt: DateTime
+  createdAt_not: DateTime
+  createdAt_in: [DateTime!]
+  createdAt_not_in: [DateTime!]
+  createdAt_lt: DateTime
+  createdAt_lte: DateTime
+  createdAt_gt: DateTime
+  createdAt_gte: DateTime
+  updatedAt: DateTime
+  updatedAt_not: DateTime
+  updatedAt_in: [DateTime!]
+  updatedAt_not_in: [DateTime!]
+  updatedAt_lt: DateTime
+  updatedAt_lte: DateTime
+  updatedAt_gt: DateTime
+  updatedAt_gte: DateTime
   name: String
   name_not: String
   name_in: [String!]
@@ -387,12 +449,17 @@ input ProductWhereInput {
   seller: UserWhereInput
 }
 
+input ProductWhereUniqueInput {
+  id: ID
+}
+
 type Query {
   posts(where: PostWhereInput, orderBy: PostOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Post]!
   users(where: UserWhereInput, orderBy: UserOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [User]!
   products(where: ProductWhereInput, orderBy: ProductOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Product]!
   post(where: PostWhereUniqueInput!): Post
   user(where: UserWhereUniqueInput!): User
+  product(where: ProductWhereUniqueInput!): Product
   postsConnection(where: PostWhereInput, orderBy: PostOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): PostConnection!
   usersConnection(where: UserWhereInput, orderBy: UserOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): UserConnection!
   productsConnection(where: ProductWhereInput, orderBy: ProductOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): ProductConnection!
@@ -637,18 +704,18 @@ export type PostOrderByInput =
   'text_DESC'
 
 export type ProductOrderByInput = 
+  'id_ASC' |
+  'id_DESC' |
+  'createdAt_ASC' |
+  'createdAt_DESC' |
+  'updatedAt_ASC' |
+  'updatedAt_DESC' |
   'name_ASC' |
   'name_DESC' |
   'pictureURL_ASC' |
   'pictureURL_DESC' |
   'price_ASC' |
-  'price_DESC' |
-  'id_ASC' |
-  'id_DESC' |
-  'updatedAt_ASC' |
-  'updatedAt_DESC' |
-  'createdAt_ASC' |
-  'createdAt_DESC'
+  'price_DESC'
 
 export type UserOrderByInput = 
   'id_ASC' |
@@ -669,12 +736,9 @@ export type MutationType =
   'UPDATED' |
   'DELETED'
 
-export interface UserCreateInput {
-  email: String
-  password: String
-  name: String
-  posts?: PostCreateManyWithoutAuthorInput
-  products?: ProductCreateManyWithoutSellerInput
+export interface PostCreateManyWithoutAuthorInput {
+  create?: PostCreateWithoutAuthorInput[] | PostCreateWithoutAuthorInput
+  connect?: PostWhereUniqueInput[] | PostWhereUniqueInput
 }
 
 export interface PostWhereInput {
@@ -743,16 +807,44 @@ export interface PostWhereInput {
   author?: UserWhereInput
 }
 
-export interface ProductCreateInput {
-  name: String
-  pictureURL: String
-  price: Float
-  seller: UserCreateOneWithoutProductsInput
+export interface UserCreateOneWithoutProductsInput {
+  create?: UserCreateWithoutProductsInput
+  connect?: UserWhereUniqueInput
 }
 
 export interface ProductWhereInput {
   AND?: ProductWhereInput[] | ProductWhereInput
   OR?: ProductWhereInput[] | ProductWhereInput
+  id?: ID_Input
+  id_not?: ID_Input
+  id_in?: ID_Input[] | ID_Input
+  id_not_in?: ID_Input[] | ID_Input
+  id_lt?: ID_Input
+  id_lte?: ID_Input
+  id_gt?: ID_Input
+  id_gte?: ID_Input
+  id_contains?: ID_Input
+  id_not_contains?: ID_Input
+  id_starts_with?: ID_Input
+  id_not_starts_with?: ID_Input
+  id_ends_with?: ID_Input
+  id_not_ends_with?: ID_Input
+  createdAt?: DateTime
+  createdAt_not?: DateTime
+  createdAt_in?: DateTime[] | DateTime
+  createdAt_not_in?: DateTime[] | DateTime
+  createdAt_lt?: DateTime
+  createdAt_lte?: DateTime
+  createdAt_gt?: DateTime
+  createdAt_gte?: DateTime
+  updatedAt?: DateTime
+  updatedAt_not?: DateTime
+  updatedAt_in?: DateTime[] | DateTime
+  updatedAt_not_in?: DateTime[] | DateTime
+  updatedAt_lt?: DateTime
+  updatedAt_lte?: DateTime
+  updatedAt_gt?: DateTime
+  updatedAt_gte?: DateTime
   name?: String
   name_not?: String
   name_in?: String[] | String
@@ -792,9 +884,11 @@ export interface ProductWhereInput {
   seller?: UserWhereInput
 }
 
-export interface UserCreateOneWithoutProductsInput {
-  create?: UserCreateWithoutProductsInput
-  connect?: UserWhereUniqueInput
+export interface UserCreateWithoutProductsInput {
+  email: String
+  password: String
+  name: String
+  posts?: PostCreateManyWithoutAuthorInput
 }
 
 export interface UserWhereInput {
@@ -864,34 +958,19 @@ export interface UserWhereInput {
   products_none?: ProductWhereInput
 }
 
-export interface UserUpdateInput {
-  email?: String
-  password?: String
-  name?: String
-  posts?: PostUpdateManyWithoutAuthorInput
-  products?: ProductUpdateManyWithoutSellerInput
-}
-
-export interface UserUpdateOneWithoutPostsInput {
-  create?: UserCreateWithoutPostsInput
-  connect?: UserWhereUniqueInput
-  disconnect?: UserWhereUniqueInput
-  delete?: UserWhereUniqueInput
-  update?: UserUpdateWithoutPostsInput
-  upsert?: UserUpsertWithoutPostsInput
-}
-
 export interface UserUpsertWithoutPostsInput {
   where: UserWhereUniqueInput
   update: UserUpdateWithoutPostsDataInput
   create: UserCreateWithoutPostsInput
 }
 
-export interface UserCreateWithoutProductsInput {
-  email: String
-  password: String
-  name: String
-  posts?: PostCreateManyWithoutAuthorInput
+export interface ProductUpdateManyWithoutSellerInput {
+  create?: ProductCreateWithoutSellerInput[] | ProductCreateWithoutSellerInput
+  connect?: ProductWhereUniqueInput[] | ProductWhereUniqueInput
+  disconnect?: ProductWhereUniqueInput[] | ProductWhereUniqueInput
+  delete?: ProductWhereUniqueInput[] | ProductWhereUniqueInput
+  update?: ProductUpdateWithoutSellerInput[] | ProductUpdateWithoutSellerInput
+  upsert?: ProductUpsertWithoutSellerInput[] | ProductUpsertWithoutSellerInput
 }
 
 export interface PostCreateInput {
@@ -899,6 +978,18 @@ export interface PostCreateInput {
   title: String
   text: String
   author: UserCreateOneWithoutPostsInput
+}
+
+export interface PostUpdateInput {
+  isPublished?: Boolean
+  title?: String
+  text?: String
+  author?: UserUpdateOneWithoutPostsInput
+}
+
+export interface UserCreateOneWithoutPostsInput {
+  create?: UserCreateWithoutPostsInput
+  connect?: UserWhereUniqueInput
 }
 
 export interface UserSubscriptionWhereInput {
@@ -911,9 +1002,11 @@ export interface UserSubscriptionWhereInput {
   node?: UserWhereInput
 }
 
-export interface UserCreateOneWithoutPostsInput {
-  create?: UserCreateWithoutPostsInput
-  connect?: UserWhereUniqueInput
+export interface UserCreateWithoutPostsInput {
+  email: String
+  password: String
+  name: String
+  products?: ProductCreateManyWithoutSellerInput
 }
 
 export interface UserUpsertWithoutProductsInput {
@@ -922,25 +1015,14 @@ export interface UserUpsertWithoutProductsInput {
   create: UserCreateWithoutProductsInput
 }
 
-export interface UserCreateWithoutPostsInput {
-  email: String
-  password: String
-  name: String
-  products?: ProductCreateManyWithoutSellerInput
+export interface ProductCreateManyWithoutSellerInput {
+  create?: ProductCreateWithoutSellerInput[] | ProductCreateWithoutSellerInput
+  connect?: ProductWhereUniqueInput[] | ProductWhereUniqueInput
 }
 
 export interface UserWhereUniqueInput {
   id?: ID_Input
   email?: String
-}
-
-export interface ProductCreateManyWithoutSellerInput {
-  create?: ProductCreateWithoutSellerInput[] | ProductCreateWithoutSellerInput
-}
-
-export interface UserUpdateWithoutProductsInput {
-  where: UserWhereUniqueInput
-  data: UserUpdateWithoutProductsDataInput
 }
 
 export interface ProductCreateWithoutSellerInput {
@@ -949,41 +1031,72 @@ export interface ProductCreateWithoutSellerInput {
   price: Float
 }
 
-export interface ProductUpdateInput {
+export interface UserUpdateWithoutProductsDataInput {
+  email?: String
+  password?: String
   name?: String
-  pictureURL?: String
-  price?: Float
-  seller?: UserUpdateOneWithoutProductsInput
+  posts?: PostUpdateManyWithoutAuthorInput
 }
 
-export interface ProductUpdateManyWithoutSellerInput {
-  create?: ProductCreateWithoutSellerInput[] | ProductCreateWithoutSellerInput
+export interface UserCreateInput {
+  email: String
+  password: String
+  name: String
+  posts?: PostCreateManyWithoutAuthorInput
+  products?: ProductCreateManyWithoutSellerInput
 }
 
-export interface PostUpdateWithoutAuthorDataInput {
-  isPublished?: Boolean
-  title?: String
-  text?: String
+export interface UserUpdateOneWithoutProductsInput {
+  create?: UserCreateWithoutProductsInput
+  connect?: UserWhereUniqueInput
+  disconnect?: UserWhereUniqueInput
+  delete?: UserWhereUniqueInput
+  update?: UserUpdateWithoutProductsInput
+  upsert?: UserUpsertWithoutProductsInput
 }
 
-export interface PostCreateManyWithoutAuthorInput {
-  create?: PostCreateWithoutAuthorInput[] | PostCreateWithoutAuthorInput
-  connect?: PostWhereUniqueInput[] | PostWhereUniqueInput
+export interface ProductUpsertWithoutSellerInput {
+  where: ProductWhereUniqueInput
+  update: ProductUpdateWithoutSellerDataInput
+  create: ProductCreateWithoutSellerInput
 }
 
-export interface PostUpdateManyWithoutAuthorInput {
-  create?: PostCreateWithoutAuthorInput[] | PostCreateWithoutAuthorInput
-  connect?: PostWhereUniqueInput[] | PostWhereUniqueInput
-  disconnect?: PostWhereUniqueInput[] | PostWhereUniqueInput
-  delete?: PostWhereUniqueInput[] | PostWhereUniqueInput
-  update?: PostUpdateWithoutAuthorInput[] | PostUpdateWithoutAuthorInput
-  upsert?: PostUpsertWithoutAuthorInput[] | PostUpsertWithoutAuthorInput
+export interface PostUpsertWithoutAuthorInput {
+  where: PostWhereUniqueInput
+  update: PostUpdateWithoutAuthorDataInput
+  create: PostCreateWithoutAuthorInput
 }
 
 export interface PostCreateWithoutAuthorInput {
   isPublished?: Boolean
   title: String
   text: String
+}
+
+export interface PostUpdateWithoutAuthorInput {
+  where: PostWhereUniqueInput
+  data: PostUpdateWithoutAuthorDataInput
+}
+
+export interface ProductCreateInput {
+  name: String
+  pictureURL: String
+  price: Float
+  seller: UserCreateOneWithoutProductsInput
+}
+
+export interface UserUpdateInput {
+  email?: String
+  password?: String
+  name?: String
+  posts?: PostUpdateManyWithoutAuthorInput
+  products?: ProductUpdateManyWithoutSellerInput
+}
+
+export interface ProductUpdateWithoutSellerDataInput {
+  name?: String
+  pictureURL?: String
+  price?: Float
 }
 
 export interface PostSubscriptionWhereInput {
@@ -996,23 +1109,20 @@ export interface PostSubscriptionWhereInput {
   node?: PostWhereInput
 }
 
-export interface UserUpdateWithoutProductsDataInput {
-  email?: String
-  password?: String
+export interface ProductUpdateWithoutSellerInput {
+  where: ProductWhereUniqueInput
+  data: ProductUpdateWithoutSellerDataInput
+}
+
+export interface ProductWhereUniqueInput {
+  id?: ID_Input
+}
+
+export interface ProductUpdateInput {
   name?: String
-  posts?: PostUpdateManyWithoutAuthorInput
-}
-
-export interface PostUpdateInput {
-  isPublished?: Boolean
-  title?: String
-  text?: String
-  author?: UserUpdateOneWithoutPostsInput
-}
-
-export interface UserUpdateWithoutPostsInput {
-  where: UserWhereUniqueInput
-  data: UserUpdateWithoutPostsDataInput
+  pictureURL?: String
+  price?: Float
+  seller?: UserUpdateOneWithoutProductsInput
 }
 
 export interface UserUpdateWithoutPostsDataInput {
@@ -1022,13 +1132,29 @@ export interface UserUpdateWithoutPostsDataInput {
   products?: ProductUpdateManyWithoutSellerInput
 }
 
-export interface UserUpdateOneWithoutProductsInput {
-  create?: UserCreateWithoutProductsInput
+export interface UserUpdateWithoutPostsInput {
+  where: UserWhereUniqueInput
+  data: UserUpdateWithoutPostsDataInput
+}
+
+export interface UserUpdateOneWithoutPostsInput {
+  create?: UserCreateWithoutPostsInput
   connect?: UserWhereUniqueInput
   disconnect?: UserWhereUniqueInput
   delete?: UserWhereUniqueInput
-  update?: UserUpdateWithoutProductsInput
-  upsert?: UserUpsertWithoutProductsInput
+  update?: UserUpdateWithoutPostsInput
+  upsert?: UserUpsertWithoutPostsInput
+}
+
+export interface PostUpdateWithoutAuthorDataInput {
+  isPublished?: Boolean
+  title?: String
+  text?: String
+}
+
+export interface UserUpdateWithoutProductsInput {
+  where: UserWhereUniqueInput
+  data: UserUpdateWithoutProductsDataInput
 }
 
 export interface PostWhereUniqueInput {
@@ -1045,15 +1171,13 @@ export interface ProductSubscriptionWhereInput {
   node?: ProductWhereInput
 }
 
-export interface PostUpdateWithoutAuthorInput {
-  where: PostWhereUniqueInput
-  data: PostUpdateWithoutAuthorDataInput
-}
-
-export interface PostUpsertWithoutAuthorInput {
-  where: PostWhereUniqueInput
-  update: PostUpdateWithoutAuthorDataInput
-  create: PostCreateWithoutAuthorInput
+export interface PostUpdateManyWithoutAuthorInput {
+  create?: PostCreateWithoutAuthorInput[] | PostCreateWithoutAuthorInput
+  connect?: PostWhereUniqueInput[] | PostWhereUniqueInput
+  disconnect?: PostWhereUniqueInput[] | PostWhereUniqueInput
+  delete?: PostWhereUniqueInput[] | PostWhereUniqueInput
+  update?: PostUpdateWithoutAuthorInput[] | PostUpdateWithoutAuthorInput
+  upsert?: PostUpsertWithoutAuthorInput[] | PostUpsertWithoutAuthorInput
 }
 
 export interface Node {
@@ -1061,9 +1185,26 @@ export interface Node {
 }
 
 export interface ProductPreviousValues {
+  id: ID_Output
+  createdAt: DateTime
+  updatedAt: DateTime
   name: String
   pictureURL: String
   price: Float
+}
+
+export interface PostEdge {
+  node: Post
+  cursor: String
+}
+
+export interface PostPreviousValues {
+  id: ID_Output
+  createdAt: DateTime
+  updatedAt: DateTime
+  isPublished: Boolean
+  title: String
+  text: String
 }
 
 export interface PageInfo {
@@ -1083,28 +1224,14 @@ export interface Post extends Node {
   author: User
 }
 
-export interface AggregatePost {
-  count: Int
-}
-
-export interface PostPreviousValues {
-  id: ID_Output
-  createdAt: DateTime
-  updatedAt: DateTime
-  isPublished: Boolean
-  title: String
-  text: String
-}
-
-export interface PostEdge {
-  node: Post
-  cursor: String
-}
-
 export interface PostConnection {
   pageInfo: PageInfo
   edges: PostEdge[]
   aggregate: AggregatePost
+}
+
+export interface AggregateProduct {
+  count: Int
 }
 
 export interface User extends Node {
@@ -1122,8 +1249,8 @@ export interface ProductConnection {
   aggregate: AggregateProduct
 }
 
-export interface AggregateProduct {
-  count: Int
+export interface BatchPayload {
+  count: Long
 }
 
 export interface UserEdge {
@@ -1131,8 +1258,8 @@ export interface UserEdge {
   cursor: String
 }
 
-export interface BatchPayload {
-  count: Long
+export interface AggregatePost {
+  count: Int
 }
 
 export interface PostSubscriptionPayload {
@@ -1149,7 +1276,10 @@ export interface UserSubscriptionPayload {
   previousValues?: UserPreviousValues
 }
 
-export interface Product {
+export interface Product extends Node {
+  id: ID_Output
+  createdAt: DateTime
+  updatedAt: DateTime
   name: String
   pictureURL: String
   price: Float
@@ -1186,6 +1316,11 @@ export interface ProductEdge {
 }
 
 /*
+The `Boolean` scalar type represents `true` or `false`.
+*/
+export type Boolean = boolean
+
+/*
 The `Int` scalar type represents non-fractional signed whole numeric values. Int can represent values between -(2^31) and 2^31 - 1. 
 */
 export type Int = number
@@ -1196,17 +1331,12 @@ The `ID` scalar type represents a unique identifier, often used to refetch an ob
 export type ID_Input = string | number
 export type ID_Output = string
 
-export type Long = string
-
 /*
 The `Float` scalar type represents signed double-precision fractional values as specified by [IEEE 754](http://en.wikipedia.org/wiki/IEEE_floating_point). 
 */
 export type Float = number
 
-/*
-The `Boolean` scalar type represents `true` or `false`.
-*/
-export type Boolean = boolean
+export type Long = string
 
 export type DateTime = string
 
@@ -1227,6 +1357,7 @@ export type Query = {
   products: (args: { where?: ProductWhereInput, orderBy?: ProductOrderByInput, skip?: Int, after?: String, before?: String, first?: Int, last?: Int }, info?: GraphQLResolveInfo | string) => Promise<Product[]>
   post: (args: { where: PostWhereUniqueInput }, info?: GraphQLResolveInfo | string) => Promise<Post | null>
   user: (args: { where: UserWhereUniqueInput }, info?: GraphQLResolveInfo | string) => Promise<User | null>
+  product: (args: { where: ProductWhereUniqueInput }, info?: GraphQLResolveInfo | string) => Promise<Product | null>
   postsConnection: (args: { where?: PostWhereInput, orderBy?: PostOrderByInput, skip?: Int, after?: String, before?: String, first?: Int, last?: Int }, info?: GraphQLResolveInfo | string) => Promise<PostConnection>
   usersConnection: (args: { where?: UserWhereInput, orderBy?: UserOrderByInput, skip?: Int, after?: String, before?: String, first?: Int, last?: Int }, info?: GraphQLResolveInfo | string) => Promise<UserConnection>
   productsConnection: (args: { where?: ProductWhereInput, orderBy?: ProductOrderByInput, skip?: Int, after?: String, before?: String, first?: Int, last?: Int }, info?: GraphQLResolveInfo | string) => Promise<ProductConnection>
@@ -1239,10 +1370,13 @@ export type Mutation = {
   createProduct: (args: { data: ProductCreateInput }, info?: GraphQLResolveInfo | string) => Promise<Product>
   updatePost: (args: { data: PostUpdateInput, where: PostWhereUniqueInput }, info?: GraphQLResolveInfo | string) => Promise<Post | null>
   updateUser: (args: { data: UserUpdateInput, where: UserWhereUniqueInput }, info?: GraphQLResolveInfo | string) => Promise<User | null>
+  updateProduct: (args: { data: ProductUpdateInput, where: ProductWhereUniqueInput }, info?: GraphQLResolveInfo | string) => Promise<Product | null>
   deletePost: (args: { where: PostWhereUniqueInput }, info?: GraphQLResolveInfo | string) => Promise<Post | null>
   deleteUser: (args: { where: UserWhereUniqueInput }, info?: GraphQLResolveInfo | string) => Promise<User | null>
+  deleteProduct: (args: { where: ProductWhereUniqueInput }, info?: GraphQLResolveInfo | string) => Promise<Product | null>
   upsertPost: (args: { where: PostWhereUniqueInput, create: PostCreateInput, update: PostUpdateInput }, info?: GraphQLResolveInfo | string) => Promise<Post>
   upsertUser: (args: { where: UserWhereUniqueInput, create: UserCreateInput, update: UserUpdateInput }, info?: GraphQLResolveInfo | string) => Promise<User>
+  upsertProduct: (args: { where: ProductWhereUniqueInput, create: ProductCreateInput, update: ProductUpdateInput }, info?: GraphQLResolveInfo | string) => Promise<Product>
   updateManyPosts: (args: { data: PostUpdateInput, where: PostWhereInput }, info?: GraphQLResolveInfo | string) => Promise<BatchPayload>
   updateManyUsers: (args: { data: UserUpdateInput, where: UserWhereInput }, info?: GraphQLResolveInfo | string) => Promise<BatchPayload>
   updateManyProducts: (args: { data: ProductUpdateInput, where: ProductWhereInput }, info?: GraphQLResolveInfo | string) => Promise<BatchPayload>
@@ -1275,6 +1409,7 @@ export class Prisma extends BasePrisma {
     products: (args, info): Promise<Product[]> => super.delegate('query', 'products', args, {}, info),
     post: (args, info): Promise<Post | null> => super.delegate('query', 'post', args, {}, info),
     user: (args, info): Promise<User | null> => super.delegate('query', 'user', args, {}, info),
+    product: (args, info): Promise<Product | null> => super.delegate('query', 'product', args, {}, info),
     postsConnection: (args, info): Promise<PostConnection> => super.delegate('query', 'postsConnection', args, {}, info),
     usersConnection: (args, info): Promise<UserConnection> => super.delegate('query', 'usersConnection', args, {}, info),
     productsConnection: (args, info): Promise<ProductConnection> => super.delegate('query', 'productsConnection', args, {}, info),
@@ -1287,10 +1422,13 @@ export class Prisma extends BasePrisma {
     createProduct: (args, info): Promise<Product> => super.delegate('mutation', 'createProduct', args, {}, info),
     updatePost: (args, info): Promise<Post | null> => super.delegate('mutation', 'updatePost', args, {}, info),
     updateUser: (args, info): Promise<User | null> => super.delegate('mutation', 'updateUser', args, {}, info),
+    updateProduct: (args, info): Promise<Product | null> => super.delegate('mutation', 'updateProduct', args, {}, info),
     deletePost: (args, info): Promise<Post | null> => super.delegate('mutation', 'deletePost', args, {}, info),
     deleteUser: (args, info): Promise<User | null> => super.delegate('mutation', 'deleteUser', args, {}, info),
+    deleteProduct: (args, info): Promise<Product | null> => super.delegate('mutation', 'deleteProduct', args, {}, info),
     upsertPost: (args, info): Promise<Post> => super.delegate('mutation', 'upsertPost', args, {}, info),
     upsertUser: (args, info): Promise<User> => super.delegate('mutation', 'upsertUser', args, {}, info),
+    upsertProduct: (args, info): Promise<Product> => super.delegate('mutation', 'upsertProduct', args, {}, info),
     updateManyPosts: (args, info): Promise<BatchPayload> => super.delegate('mutation', 'updateManyPosts', args, {}, info),
     updateManyUsers: (args, info): Promise<BatchPayload> => super.delegate('mutation', 'updateManyUsers', args, {}, info),
     updateManyProducts: (args, info): Promise<BatchPayload> => super.delegate('mutation', 'updateManyProducts', args, {}, info),
