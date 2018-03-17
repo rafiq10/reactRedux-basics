@@ -6,12 +6,12 @@ class User extends React.Component {
     render() {
         return(
             <Container>
-                <Row className>
+                <Row>
                     <Col xs={12}>
                         <h1>The User Page </h1>
                     </Col>
                 </Row>
-                <Row className>
+                <Row>
                     <Col xs={12}>
                         <p>User Name: {this.props.username}</p>
                     </Col>
