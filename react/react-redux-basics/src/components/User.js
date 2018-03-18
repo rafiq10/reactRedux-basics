@@ -2,8 +2,7 @@ import React from 'react';
 import {Container, Row, Col} from 'reactstrap';
 
 
-class User extends React.Component {
-    render() {
+export const User = (props) => {
         return(
             <Container>
                 <Row>
@@ -13,12 +12,9 @@ class User extends React.Component {
                 </Row>
                 <Row>
                     <Col xs={12}>
-                        <p>User Name: {this.props.username}</p>
+                        <p>User Name: {props.username}</p>
                     </Col>
                 </Row>
             </Container>
         );
-    }
-}
-
-export default User;
+    };
